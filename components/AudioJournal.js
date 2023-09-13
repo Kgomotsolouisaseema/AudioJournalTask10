@@ -8,17 +8,14 @@ import {
   Alert,
   Pressable,
 } from "react-native";
-import * as yup from "yup";
+
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-  const schema = yup.object().shape({
-    email: yup.string().email().required(),
-    password: yup.string().required().min(8).max(10),
-  });
+ 
 
   const handleSubmit = () => {
     schema
