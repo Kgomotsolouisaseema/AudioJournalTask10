@@ -1,9 +1,11 @@
-// import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
-import {StyleSheet, TextInput, TouchableOpacity,Text,View,Pressable,} from "react-native";
+import {StyleSheet, TextInput, TouchableOpacity,Text,View,Pressable,Image} from "react-native";
 
 
-export default function LoginScreen() {
+export default function SignUp() {
+  const navigation = useNavigation();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,16 +16,32 @@ export default function LoginScreen() {
     console.log("SignUp BTN clicked");
   };
 
-  const handleSignUpPress = () =>{
+  const handleSignUp = () =>{
     console.log('Signup page')
   };
 
-  const handleForgotPasswordPress = () =>{
+  const handleForgotPassword = () =>{
     console.log('password forgot')
   }
 
+  
+
+  // const navigatetoSignIn =() =>{
+  //   navigation.navigate("SignIn") //navigate to signIn page
+  //   console.log("Proceed btn pressed")
+  // };
+
+
   return (
     <View style={styles.container}>
+      <View style={styles.topContainer}>
+      <Text style={styles.appName}>Audio Journal </Text>
+      <Image
+            style={styles.image}
+            source={require("../assets/blackcasset.jpg")}
+          />
+ 
+      </View>
       <View style={styles.bottomContainer}>
         <View style={styles.innerContainer}>
           <View style={styles.inputContainer}>
@@ -51,17 +69,17 @@ export default function LoginScreen() {
               style={styles.actionButton}
               onPress={() => handleSubmit()}
             >
-              <Text style={styles.signIn}>Sign Up</Text>
+              <Text style={styles.signIn}>JOIN US</Text>
             </Pressable>
             <View>
               <View style={styles.signUpOpt}>
                 <Text style={styles.noAccText}>Already Signed Up?</Text>
-                <TouchableOpacity onPress={handleSignUpPress}>
+                <TouchableOpacity onPress={handleSignUp}>
                   <Text style={styles.signUpText}>Sign Up</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.forgotPassWordCont}>
-                <TouchableOpacity onPress={handleForgotPasswordPress}>
+                <TouchableOpacity onPress={handleForgotPassword}>
                   <Text style={styles.forgotPassWordText}>Forgot Password</Text>
                 </TouchableOpacity>
               </View>
@@ -77,7 +95,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#26394D",
+    backgroundColor: "#FFEBCD", //blanched Almond color
     alignItems: "center",
   },
   topContainer: {
@@ -89,28 +107,16 @@ const styles = StyleSheet.create({
   },
   appName: {
     // color: "white",
-    fontSize: 17,
+    fontSize: 40,
     fontWeight: "bold",
-    width: 200,
-    height: 200,
-    backgroundColor: "red",
+    fontFamily: "C",
+    alignItems: "center"
   },
-
   image: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-  },
-  camContainer: {
-    height: 42,
-    width: 42,
-    backgroundColor: "#1EA0E5",
-    borderRadius: 21,
-    position: "absolute",
-    top: 146,
-    left: 146,
-    justifyContent: "center",
-    alignItems: "center",
+    width: 350,
+    height: 250,
+    borderRadius: 400,
+    
   },
 
   bottomContainer: {
@@ -122,7 +128,7 @@ const styles = StyleSheet.create({
 
   innerContainer: {
     height: 380,
-    backgroundColor: "#FFF",
+    // backgroundColor:"#CD7F32", //BRONZE
     borderRadius: 25,
     padding: 20,
     width: 320,
@@ -130,11 +136,11 @@ const styles = StyleSheet.create({
   textInput: {
     //fields for email and password
     borderRadius: 15,
-    borderColor: "#1EA0E5",
+    // borderColor: "#654321", ///Dark Brown
     borderWidth: 1,
     padding: 10,
-    height: 46,
-    marginVertical: 15, //spaces in between the input areas
+    height: 40,
+    marginVertical: 12, //spaces in between the input areas
   },
 
   actionContainer: {
@@ -145,18 +151,18 @@ const styles = StyleSheet.create({
   },
 
   actionButton: {
-    backgroundColor: "#1EA0E5",
+    backgroundColor: "#654321", //Dark Brown color
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     width: 280, //width of the save button ,
     height: 46,
-    marginVertical: 10,
+    marginVertical: 13,
   },
 
   signIn: {
     color: "#FFF",
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: "bold",
   },
 });

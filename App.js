@@ -1,16 +1,44 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet,View , Text} from 'react-native';
-// import LandPage from './components/LandPage';
+// import 'react-native-gesture-handler';        //Rememebr to uncomment when routing to pages later 
+// import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, View } from 'react-native';
+
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+import LandPage from './components/LandPage';
+import SignUp from './components/SignUp';
+import SignOut from './components/SignOut';
+import SignIn from './components/SignIn';
+import AudioJournal from './components/AudioJournal';
+
 
 export default function App() {
+  const Stack = createStackNavigator();
+
   return (
-    <View style={styles.container}>
-      {/* <LandPage/>  */}
-      <Text> Hello World</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer initialRouteName="Home">
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={LandPage} />
+        {/* <Stack.Screen name="AudioJournal"component={AudioJournal} /> */}
+        <Stack.Screen name="SignIn" component={SignIn} />
+        <Stack.Screen name="SignUp" component={SignUp} />
+        <Stack.Screen name="SignOut" component={SignOut} />
+
+        
+      </Stack.Navigator>
+
+
+    </NavigationContainer>
+
   );
 }
+
+{/* <View style={styles.container}>
+{/* <LandPage/> */}
+{/* <SignupScreen/>
+<StatusBar style="auto" />
+</View> */} 
 
 const styles = StyleSheet.create({
   container: {

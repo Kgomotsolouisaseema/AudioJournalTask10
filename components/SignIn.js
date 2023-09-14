@@ -1,44 +1,42 @@
-// import React, { useState } from "react";
+
 import { useState } from "react";
-
-import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  View,
-
-  Pressable,
-} from "react-native";
+import {StyleSheet, TextInput, TouchableOpacity,Text,View,Pressable,Image} from "react-native";
 
 
-export default function LoginScreen() {
+export default function SignUp() {
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
 
-
+//Functions for buttons 
   const handleSubmit = () => {
-    console.log("Handle submit buttin clicked");
-   //add logic
+    console.log("SignUp BTN clicked");
   };
 
-  const handleSignUpPress = () =>{
+  const handleSignUp = () =>{
     console.log('Signup page')
   };
 
-  const handleForgotPasswordPress = () =>{
+  const handleForgotPassword = () =>{
     console.log('password forgot')
   }
 
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
-        <Text style={styles.appName}>Audio Journal</Text>
+    
+      <Image
+            style={styles.image}
+            source={require("../assets/blackcasset.jpg")}
+          />
+ 
       </View>
-
       <View style={styles.bottomContainer}>
         <View style={styles.innerContainer}>
           <View style={styles.inputContainer}>
+    
             <TextInput
               style={styles.textInput}
               placeholder="Email"
@@ -52,26 +50,27 @@ export default function LoginScreen() {
             />
           </View>
           <View style={styles.actionContainer}>
+           
             <Pressable
               style={styles.actionButton}
-              onPress={() => handleSubmit()}
-            >
-              <Text style={styles.signIn}>Sign In</Text>
+              onPress={() => handleSubmit()}>
+              <Text style={styles.signIn}>JOIN US</Text>
             </Pressable>
-            <View>
+        
+          </View>
+          <View style={styles.navlogs}>
               <View style={styles.signUpOpt}>
-                <Text style={styles.noAccText}>No account?</Text>
-                <TouchableOpacity onPress={handleSignUpPress}>
+                <Text style={styles.noAccText}>Already Signed Up?</Text>
+                <TouchableOpacity onPress={handleSignUp}>
                   <Text style={styles.signUpText}>Sign Up</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.forgotPassWordCont}>
-                <TouchableOpacity onPress={handleForgotPasswordPress}>
+                <TouchableOpacity onPress={handleForgotPassword}>
                   <Text style={styles.forgotPassWordText}>Forgot Password</Text>
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
         </View>
       </View>
     </View>
@@ -82,7 +81,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#26394D",
+    backgroundColor: "#FFEBCD", //blanched Almond color
     alignItems: "center",
   },
   topContainer: {
@@ -94,40 +93,28 @@ const styles = StyleSheet.create({
   },
   appName: {
     // color: "white",
-    fontSize: 17,
+    fontSize: 40,
     fontWeight: "bold",
-    width: 200,
-    height: 200,
-    backgroundColor: "red",
+    fontFamily: "C",
+    alignItems: "center"
   },
-
   image: {
-    width: 200,
-    height: 200,
+    width: 350,
+    height: 280,
     borderRadius: 100,
-  },
-  camContainer: {
-    height: 42,
-    width: 42,
-    backgroundColor: "#1EA0E5",
-    borderRadius: 21,
-    position: "absolute",
-    top: 146,
-    left: 146,
-    justifyContent: "center",
-    alignItems: "center",
+    
   },
 
   bottomContainer: {
     flex: 1,
-    width: "100%",
+    width: "50%",
     // backgroundColor: "red",
     alignItems: "center",
   },
 
   innerContainer: {
     height: 380,
-    backgroundColor: "#FFF",
+    // backgroundColor:"#CD7F32", //BRONZE
     borderRadius: 25,
     padding: 20,
     width: 320,
@@ -135,33 +122,38 @@ const styles = StyleSheet.create({
   textInput: {
     //fields for email and password
     borderRadius: 15,
-    borderColor: "#1EA0E5",
+    // borderColor: "#654321", ///Dark Brown
     borderWidth: 1,
     padding: 10,
-    height: 46,
-    marginVertical: 15, //spaces in between the input areas
+    height: 40,
+    marginVertical: 12, //spaces in between the input areas
   },
 
   actionContainer: {
-    height: 60,
+    height: "40%",
     marginTop: 10,
     // backgroundColor: 'red', //include these for checking purposes
     justifyContent: "center",
   },
 
   actionButton: {
-    backgroundColor: "#1EA0E5",
+    backgroundColor: "#654321", //Dark Brown color
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     width: 280, //width of the save button ,
     height: 46,
-    marginVertical: 10,
+    marginVertical: 13,
   },
 
   signIn: {
     color: "#FFF",
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: "bold",
   },
+  navlogs:{
+    justifyContent: "center",
+    alignItems: "center",
+
+  }
 });

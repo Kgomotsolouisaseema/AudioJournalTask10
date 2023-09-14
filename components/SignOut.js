@@ -1,20 +1,17 @@
-import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { View, StyleSheet, Text, Image, Pressable } from "react-native";
 
 function LandPage() {
-  const navigation = useNavigation();
 
-  const navigatetoSignIn =() =>{
-    navigation.navigate("SignIn") //navigate to signIn page
-    console.log("Proceed btn pressed")
+  const handleSignOut =() =>{
+    console.log("SIGN OUT BTN CLICKED")
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.topContainer}>
+      {/* <View style={styles.topContainer}>
         <Text style={styles.appName}> Bubbles Audio Journal</Text>
-      </View>
+      </View> */}
       <View style={styles.middleContainer}>
         <Image style={styles.image} source={require("../assets/retroLady.jpg")} />
       </View>
@@ -22,11 +19,9 @@ function LandPage() {
         <View style={styles.actionContainer}>
         <Pressable
               style={styles.actionButton}
-              title="Head to Sign In"
-
-              onPress={navigatetoSignIn}
+              onPress={() => handleSignOut()}
             >
-              <Text style={styles.signIn}>PROCEED</Text>
+              <Text style={styles.signout}>SIGN OUT</Text>
             </Pressable>
 
         </View>
@@ -41,12 +36,12 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#FFEBCD", //blanched Almond color
   },
-  topContainer: {
-    // backgroundColor: "blue",
-    height: "20%",
-    justifyContent: "center",
-    alignItems:"center",  //BRING THE NAME TO THE CENTER 
-  },
+//   topContainer: {
+//     // backgroundColor: "blue",
+//     height: "20%",
+//     justifyContent: "center",
+//     alignItems:"center",  //BRING THE NAME TO THE CENTER 
+//   },
   appName: {
     // color: "white",
     fontSize: 40,
@@ -84,7 +79,7 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
 
-  signIn: {
+  signout: {
     color: "#FFF",
     fontSize: 19,
     fontWeight: "bold",
