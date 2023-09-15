@@ -1,22 +1,38 @@
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import {StyleSheet, TextInput, TouchableOpacity,Text,View,Pressable,Image} from "react-native";
+import { auth  } from "../Firebase";
+import { createUserWithEmailAndPassword  } from "firebase/auth";
 
 
 export default function SignUp() {
   const navigation = useNavigation();
 
-  const [name, setName] = useState("");
+  // const navigatetoAudioJournal =() =>{
+  //   navigation.navigate("AudioJournal") //navigate to signIn page
+  //   console.log("Proceed btn pressed ,to Audi Journal")
+  // };
+
+  // const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   
 
 //Functions for buttons 
-  const handleSubmit = () => {
-    console.log("SignUp BTN clicked");
+  const handleSubmit = async () => {
+    try{
+      await  createUserWithEmailAndPassword( auth ,email, password).then(()=>{
+        console.log("SignUp BTN clicked");
+        navigation.navigate("AudioJournal") //navigate to signIn page
+      })
+      }catch(error){
+        console.error("Error" , error)
+      }
+   
   };
 
-  const handleSignUp = () =>{
+  const handleSignUp = async () =>{
+   
     console.log('Signup page')
   };
 
@@ -45,11 +61,11 @@ export default function SignUp() {
       <View style={styles.bottomContainer}>
         <View style={styles.innerContainer}>
           <View style={styles.inputContainer}>
-          <TextInput
+          {/* <TextInput
               style={styles.textInput}
               placeholder="Name"
               onChangeText={(text) => setName(text)}
-            />
+            /> */}
 
             <TextInput
               style={styles.textInput}

@@ -1,27 +1,59 @@
-
+import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import {StyleSheet, TextInput, TouchableOpacity,Text,View,Pressable,Image} from "react-native";
+import { auth ,googleProvider } from "../Firebase";
+import { createUserWithEmailAndPassword   } from "firebase/auth";
 
+export default function SignIn() {
+  const navigation = useNavigation();
 
-export default function SignUp() {
+  // const navigatetoAudioJournal =() =>{
+  //   navigation.navigate("AudioJournal") //navigate to signIn page
+  //   console.log("Proceed btn pressed ,to Audi Journal")
+  // };
 
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   
 
 //Functions for buttons 
-  const handleSubmit = () => {
-    console.log("SignUp BTN clicked");
-  };
+  // const handleSubmit = () => {
+  //   console.log("SignUp BTN clicked");
+  // };
 
   const handleSignUp = () =>{
-    console.log('Signup page')
+    navigation.navigate("SignUp") //navigate to signIn page
+    console.log("Proceed btn pressed ,to Audi Journal")
   };
 
   const handleForgotPassword = () =>{
     console.log('password forgot')
   }
+
+
+
+  const signinPg = async () => {
+    try{
+    await createUserWithEmailAndPassword(auth, email, password);
+    navigation.navigate("AudioJournal") //navigate to signIn page
+    console.log("Proceed btn pressed ,to Audi Journal")
+    }catch(error){
+      console.error("Error" , error)
+    }
+  }; // signing end bracket 
+
+  const signinwithgoogle = async() => {
+    try{
+      await  signInWithPopup(auth, googleProvider);
+      navigation.navigate("AudioJournal") //navigate to signIn page
+      console.log("Proceed btn pressed ,to Audi Journal")
+      }catch(error){
+        console.error("Error signing in with Google" , error)
+      }
+
+  };//google end bracket
+
+  
 
   return (
     <View style={styles.container}>
@@ -53,8 +85,14 @@ export default function SignUp() {
            
             <Pressable
               style={styles.actionButton}
-              onPress={() => handleSubmit()}>
+              onPress={() => signinPg()}>
               <Text style={styles.signIn}>JOIN US</Text>
+            </Pressable>
+              
+            <Pressable
+              style={styles.actionButton}
+              onPress={() => signinwithgoogle()}>
+              <Text style={styles.signIn}>Sign In with Google</Text>
             </Pressable>
         
           </View>

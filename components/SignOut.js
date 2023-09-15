@@ -1,11 +1,25 @@
 import React from "react";
 import { View, StyleSheet, Text, Image, Pressable } from "react-native";
+import { auth ,googleProvider } from "../Firebase";
+// import { signOut} from "firebase/auth";
 
 function LandPage() {
 
-  const handleSignOut =() =>{
-    console.log("SIGN OUT BTN CLICKED")
-  };
+  // const handleSignOut =() =>{
+  //   console.log("SIGN OUT BTN CLICKED")
+  // };
+  // TAKE THIS FUNCTION TO THE SIGN OUT COMP
+  
+  const logout = async() => {
+    try{
+      await  auth.signOut().then(()=>{
+        console.log("Signed out success")
+      })
+      }catch(error){
+        console.error("Error signing in with Google" , error)
+      }
+
+  };//google end bracket
 
   return (
     <View style={styles.container}>
@@ -19,7 +33,7 @@ function LandPage() {
         <View style={styles.actionContainer}>
         <Pressable
               style={styles.actionButton}
-              onPress={() => handleSignOut()}
+              onPress={() => logout()}
             >
               <Text style={styles.signout}>SIGN OUT</Text>
             </Pressable>

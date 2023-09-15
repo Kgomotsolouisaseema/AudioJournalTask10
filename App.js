@@ -1,6 +1,7 @@
 // import 'react-native-gesture-handler';        //Rememebr to uncomment when routing to pages later 
-// import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+// // import Reanimated from 'react-native-reanimated';
+
+import { StyleSheet } from 'react-native';
 
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -20,9 +21,10 @@ export default function App() {
     <NavigationContainer initialRouteName="Home">
       <Stack.Navigator>
         <Stack.Screen name="Home" component={LandPage} />
-        {/* <Stack.Screen name="AudioJournal"component={AudioJournal} /> */}
+        
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="SignUp" component={SignUp} />
+        <Stack.Screen name="AudioJournal"component={AudioJournal} />
         <Stack.Screen name="SignOut" component={SignOut} />
 
         
@@ -33,12 +35,6 @@ export default function App() {
 
   );
 }
-
-{/* <View style={styles.container}>
-{/* <LandPage/> */}
-{/* <SignupScreen/>
-<StatusBar style="auto" />
-</View> */} 
 
 const styles = StyleSheet.create({
   container: {
