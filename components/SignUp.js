@@ -13,7 +13,7 @@ export default function SignUp() {
   //   console.log("Proceed btn pressed ,to Audi Journal")
   // };
 
-  // const [name, setName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   
@@ -61,11 +61,11 @@ export default function SignUp() {
       <View style={styles.bottomContainer}>
         <View style={styles.innerContainer}>
           <View style={styles.inputContainer}>
-          {/* <TextInput
+          <TextInput
               style={styles.textInput}
               placeholder="Name"
               onChangeText={(text) => setName(text)}
-            /> */}
+            />
 
             <TextInput
               style={styles.textInput}
@@ -85,13 +85,13 @@ export default function SignUp() {
               style={styles.actionButton}
               onPress={() => handleSubmit()}
             >
-              <Text style={styles.signIn}>JOIN US</Text>
+              <Text style={styles.signIn}>SIGN UP</Text>
             </Pressable>
             <View>
               <View style={styles.signUpOpt}>
-                <Text style={styles.noAccText}>Already Signed Up?</Text>
+                <Text style={styles.noAccText}>Haven't Signed Up?</Text>
                 <TouchableOpacity onPress={handleSignUp}>
-                  <Text style={styles.signUpText}>Sign Up</Text>
+                  <Text style={styles.signUpText}>Sign In</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.forgotPassWordCont}>

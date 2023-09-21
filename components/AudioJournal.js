@@ -2,18 +2,26 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Button,
   StyleSheet,
   FlatList,
   TextInput,
-  Alert,
   Image,
 } from "react-native";
-// import { Input } from "react-native-elements";
-// import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Audio } from "expo-av";
-import listenHead from "../assets/listenHead.jpg";
-import { TouchableOpacity } from "react-native-web";
+import { Audio, getStatusAsync } from "expo-av";
+import theicon from "../assets/theicon.jpg";
+import { TouchableOpacity } from "react-native";
+import { auth, db } from "../Firebase";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  doc,
+} from "firebase/firestore";
+// import { onAuthStateChanged } from "firebase/auth";
+// import { Tile } from "react-native-elements";
 
 const RecordingOptions = {
   isMeteringEnabled: true,
@@ -43,37 +51,48 @@ const RecordingOptions = {
 };
 
 const AudioRecorder = () => {
+  // const [currentUser , setUser]=useState(null);
   const [recording, setRecording] = useState(null);
-  // const [sound, setSound] = React.useState();
   const [title, setTitle] = useState("");
   const [audioTitle, setAudioTitle] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [recordings, setRecordings] = useState([
     { id: 1, title: "Recording 1" },
     { id: 2, title: "Recording 2" },
   ]);
 
-  console.log(recordings); //dont remove until it works and its a placemarker for Audi Recoder library
+  //  useEffect(()=>{
+  //   onAuthStateChanged(auth,(user)=>{
+  //     // setUser(user);
+  //   })
 
-  //Playing Sounds
+  //  },[])
 
-  // async function playSound() {
-  //   console.log('Loading Sound');
-  //   const { sound } = await Audio.Sound.createAsync( require('./assets/Hello.mp3')
-  //   );
-  //   setSound(sound);
+  //  const user = user.currentUser;
+  // console.log("Userlogged in");
+  useEffect(() => {
+    // Load recordings from Firebase Firestore when the component mounts
+    const loadRecordings = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "recordings"));
+        const loadedRecordings = [];
+        querySnapshot.forEach((doc) => {
+          loadedRecordings.push({
+            id: doc.id,
+            title: doc.data().title,
+            recording: doc.recording,
+            // Add other fields you want to retrieve from Firestore here
+          });
+        });
+        setRecordings(loadedRecordings);
+      } catch (error) {
+        console.log("Error loading recordings", error);
+      }
+    };
 
-  //   console.log('Playing Sound');
-  //   await sound.playAsync();
-  // }
-
-  // React.useEffect(() => {
-  //   return sound
-  //     ? () => {
-  //         console.log('Unloading Sound');
-  //         sound.unloadAsync();
-  //       }
-  //     : undefined;
-  // }, [sound]);
+    loadRecordings();
+  }, []);
 
   //Recording Sounds
 
@@ -82,259 +101,186 @@ const AudioRecorder = () => {
       const permission = await Audio.requestPermissionsAsync();
       if (permission.status === "granted") {
         console.log("Requesting Permissiions...");
-        await Audio.requestPermissionsAsync();
+        // await Audio.requestPermissionsAsync(); //apprently imasking for permisison twice
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
         });
-        const { recording } = await Audio.Recording.createAsync(
+        const recordingObject = await Audio.Recording.createAsync(
           RecordingOptions
         );
-        setRecording(recording);
+        setRecording(recordingObject);
+        console.log("Recording started..");
+      } else {
+        console.warn("Audio recording permission not granted.");
       }
-      console.log("Starting recording..");
       // const {recording} = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
     } catch (error) {
       console.error("Failed to start recording", error);
     }
   }
 
-  // stop the active recording
-// stop the active recording
-async function stopRecording() {
-  try {
-    console.log("Recording stopped"); // Add this line for the console log
-    await recording.stopAndUnloadAsync();
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-    });
-    let recordingsArray = [...recordings];
-    const { sound, status } = await recording.createNewLoadedSoundAsync();
-    const newRecording = {
-      id: Date.now().toString(),
-      title: audioTitle,
-      sound: sound,
-      file: recording.getURI(),
-      duration: getDurationFormatted(status.durationMillis),
-    };
-    recordingsArray.push(newRecording);
-    setRecordings(recordingsArray);
-    setRecording(undefined);
-    setAudioTitle("");
-
-    // Save recordings
-    await saveRecordings([
-      ...recordings,
-      {
-        sound: recording.getURI(),
-        duration: getDurationFormatted(status.durationMillis),
-        file: recording.getURI(),
-      },
-    ]);
-  } catch (error) {
-    console.log(error);
-    console.error(error);
-    setErrorMessage("Failed to save. Record audio first!");
-  }
-}
-
-
-
-  // async function stopRecording() {
-  //   try {
-  //     console.log("Recording stopped"); // Add this line for the console log
-  //     await recording.stopAndUnloadAsync();
-  //     await Audio.setAudioModeAsync({
-  //       allowsRecordingIOS: false,
-  //     });
-  //     let recordingsArray = [...recordings];
-  //     const { sound, status } = await recording.createNewLoadedSoundAsync();
-  //     const newRecording = {
-  //       id: Date.now().toString(),
-  //       title: audioTitle,
-  //       sound: sound,
-  //       file: recording.getURI(),
-  //       duration: getDurationFormatted(status.durationMillis),
-  //     };
-  //     recordingsArray.push(newRecording);
-  //     setRecordings(recordingsArray);
-  //     setRecording(undefined);
-  //     setAudioTitle("");
-
-
-
-  //     // Save recordings
-  //     await saveRecordings([
-  //       ...recordings,
-  //       {
-  //         sound: recording.getURI(),
-  //         duration: getDurationFormatted(status.durationMillis),
-  //         file: recording.getURI(),
-  //       },
-  //     ]);
-  //   } catch (error) {
-  //     console.log(error);
-  //     console.error(error);
-  //     setErrorMessage("Failed to save. Record audio first!");
-  //   }
-  // }
-
-  // //Get the duration
-  // function getDurationFormatted(millis) {
-  //   const minutes = millis / 1000 / 60;
-  //   const minutesDisplay = Math.floor(minutes);
-  //   const seconds = Math.round((minutes - minutesDisplay) * 60);
-  //   const secondsDisplay = seconds < 10 ? `0${seconds}` : seconds;
-  //   return `${minutesDisplay}:${secondsDisplay}`;
-  // }
-
-  //async function for recording
-  async function saveRecordings(recordings) {
+  async function stopRecording() {
     try {
-      await AsyncStorage.setItem("recorded_audio", JSON.stringify(recordings));
-      Alert.alert("Success", "Audio Saved", [{ text: "OKAY" }]);
-    } catch (Error) {
-      console.error("Error saving recording", Error);
-      Alert.alert("Error", "Failed to save audio!, Stop Recording First !", [
-        { text: "OKAY" },
-      ]);
-    }
-  }
+      if (recording && recording.isRecording) {
+        //.getStatusAsync()
+        console.log("Recording stopped");
+        await recording.stopAndUnloadAsync();
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+        });
 
-  //Async storage Implementations CRUD
-
-  // const retrieveData = async () => {
-  //   try {
-  //     const titleName = await AsyncStorage.getItem("audio_name");
-  //     if (titleName !== null) {
-  //       setRecording(titleName);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error Retriveing recording", error);
-  //   }
-  // };
-
-  //Load state of recording when app  components mounts
-  useEffect(() => {
-    const loadRecordingState = async () => {
-      try {
-        const recordingState = await AsyncStorage.getItem("recording_state");
-        if (recordingState !== null) {
-          setRecording(recordingState === "true"); //convert string to boolean
-        }
-      } catch (error) {
-        console.error("Error on reording state ", error);
-      }
-    };
-
-    loadRecordingState();
-  }, []); // Empty dependency array ensures this runs once when the component mounts
-
-  //Save title function conneted to Async  storage
-
-  const saveTitle = async (title) => {
-    try {
-      //create new object with a unique id
-      const newRecording = { id: Date.now(), title };
-
-      //update state with new recording
-      setRecordings((prevRecordings) => [...prevRecordings, newRecording]);
-
-      //save updated recordings array to AsyncStorage
-      await AsyncStorage.setItem(
-        "saved_title",
-        "Hello",
-        JSON.stringify(recordings)
-      );
-      console.log("Title saved: " + title);
-      //clear state
-      setTitle("");
-    } catch (error) {
-      console.error("Error saving title", error);
-    }
-  };
-
-  //functions to get data and dispay it on the UI
-  useEffect(() => {
-    const laodRecordings = async () => {
-      try {
-        const savedRecordings = await AsyncStorage.getItem(
-          "Recordings_saved" + recordings
+        // Upload audio to Firebase Storage
+        const storage = getStorage();
+        const audioFileRef = ref(storage, `audioRecordings/${Date.now()}.m4a`);
+        const recordingURL = recording.getURI();
+        console.log("Recording stopped and stored at", recordingURL);
+        const recordingBlob = await fetch(recordingURL).then((res) =>
+          res.blob()
         );
-        if (savedRecordings !== null) {
-          setRecordings(JSON.parse(savedRecordings));
+
+        // Upload the audio recording as a string to Storage
+        await uploadBytes(audioFileRef, recordingBlob, "data_url");
+        console.log("file upload success", recordingBlob);
+
+        // Save the recording URL and other details to Firestore
+        const docRef = await addDoc(collection(db, "recordings"), {
+          title: audioTitle,
+          audioTitle: audioTitle,
+          audioURL: `gs://${audioFileRef.bucket}/${audioFileRef.fullPath}`,
+        });
+
+        let recordingsArray = [...recordings];
+        const { sound, status } = await recording.createNewLoadedSoundAsync();
+        const newRecording = {
+          id: Date.now().toString(),
+          title: audioTitle,
+          sound: sound,
+          file: recording.getURI(),
+          duration: getDurationFormatted(status.durationMillis),
+        };
+        recordingsArray.push(newRecording);
+        setRecordings(recordingsArray);
+        setRecording(undefined);
+        setAudioTitle("");
+
+        // Save recordings
+        await saveRecordings([
+          ...recordings,
+          {
+            sound: recording.getURI(),
+            duration: getDurationFormatted(status.durationMillis),
+            file: recording.getURI(),
+          },
+        ]);
+      } else {
+        console.log("Recording is not active.");
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Failed to save. Record audio first!");
+    }
+  }
+
+  const editRecordingTitle = (index) => {
+    console.log("edit btn clicked ");
+    setEditTitle(index);
+    setAudioTitle(recordings[index].title);
+
+    // setTitle(recordings[index].title)
+  };
+
+  //edit title function
+  const updateTitle = async (index) => {
+    const record = recordings[index];
+    console.log("edit btn clicked ", record);
+
+    try {
+      await updateDoc(doc(db, "recordings", record.id), {
+        title: audioTitle,
+        // Update other fields as needed
+      });
+
+      const updatedRecordings = recordings.map((recording) => {
+        if (recording.id === id) {
+          return { ...recording, title: audioTitle };
         }
-      } catch (error) {
-        console.log("Error saving Recordings ", error);
-      }
-    };
-    laodRecordings();
-  }, []); //empty dependency , runs once
+        return recording;
+      });
 
-  //editRecording function
-
-  const editRecordingTitle = (id, newTitle) => {
-    const updatedRecordings = recordings.map((recording) => {
-      if (recording.id === id) {
-        return { ...recording, title: newTitle }; //update title as needed
-      }
-      return recording;
-    });
-    //update state of recordings array
-    setRecordings(updatedRecordings);
+      setRecordings(updatedRecordings);
+    } catch (error) {
+      console.error("Error editing recording title", error);
+    }
   };
 
-  const deleteRecording = (id) => {
-    const updatedRecordings = recordings.filter(
-      (recording) => recording.id !== id
-    );
-
-    //Update the state with the new recordings array
-    setRecordings(updatedRecordings);
+  const deleteRecording = async (id) => {
+    console.log("delete btn clicked ", id);
+    try {
+      await deleteDoc(doc(db, "recordings", id));
+      const updatedRecordings = recordings.filter(
+        (recording) => recording.id !== id
+      );
+      console.log("success delete");
+      setRecordings(updatedRecordings);
+    } catch (error) {
+      console.error("Error deleting recording", error);
+    }
   };
+
+  // const logout = () => {
+  //   navigation.navigate("SignOut"); //navigate to sign out page
+  //   console.log("Proceed btn pressed, to log out");
+  // };
 
   return (
     <View style={styles.container}>
-      <TextInput style={styles.titleNew}
+      <TextInput
+        style={styles.titleNew}
         placeholder="New Title"
         value={audioTitle}
         onChangeText={(text) => setAudioTitle(text)}
+         
       />
-      <View  style={styles.ImageContainer}>
-      <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
-
-        <Image
-          source={listenHead} 
-          style={styles.imagePress} 
-        />
-      </TouchableOpacity>
-      </View>
-   
-      <View style={styles.playSound}>
-        {/* <Button title="Play Sound" onPress={playSound} /> */}
+      <View style={styles.ImageContainer}>
+        <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
+          <Image source={theicon} style={styles.imagePress} />
+        </TouchableOpacity>
       </View>
 
-      {/* List of Recorded Titles */}
-      <FlatList //react-native element that renders a scrollable list of data
+      <View style={styles.playSound}></View>
+
+      <FlatList
         data={recordings}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => {
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item, index }) => {
           try {
             return (
-              <View style={styles.listItem}>
+              <View key={index} style={styles.listItem}>
                 <Text>{item.title}</Text>
-                <TextInput
+                {/* <TextInput
                   style={styles.input}
                   value={item.title}
                   onChangeText={(text) => editRecordingTitle(item.id, text)}
-                />
-                <TouchableOpacity 
-                  style={styles.btn}
-                  title="Edit"
-                  onPress={(text) => editRecordingTitle(item.id, text)}
-                >
-                 <Text style={styles.btntext}>Edit</Text> 
-                </TouchableOpacity>
+                /> */}
+
+                {editTitle === index ? (
+                  <TouchableOpacity
+                    style={styles.btn}
+                    title="Edit"
+                    onPress={() => updateTitle(index)}
+                  >
+                    <Text style={styles.btntext}>Update</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.btn}
+                    title="Edit"
+                    onPress={() => editRecordingTitle(index)}
+                  >
+                    <Text style={styles.btntext}>Edit</Text>
+                  </TouchableOpacity>
+                )}
 
                 <TouchableOpacity
                   style={styles.btn}
@@ -347,10 +293,17 @@ async function stopRecording() {
             );
           } catch (error) {
             console.error("Error rendering FlatList item:", error);
-            return null; // Return null to skip rendering problematic items
+            return null;
           }
         }}
       />
+      {/* <TouchableOpacity
+                  style={styles.btn}
+                  title="Logout"
+                  onPress={logout()}
+                >
+                  <Text style={styles.btntext}>Log Out</Text>
+                </TouchableOpacity> */}
     </View>
   );
 };
@@ -363,24 +316,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  ImageContainer:{
-    width: '30%',
+  ImageContainer: {
+    width: "30%",
     alignItems: "center",
     justifyContent: "center",
     // flex: 2,
-    marginTop: 100, //moves the image in the center of the page 
-
+    marginTop: 100, //moves the image in the center of the page
   },
-  imagePress:{
-    width: 280, 
+  imagePress: {
+    width: 280,
     height: 280,
-    borderRadius: 100, 
+    borderRadius: 100,
     padding: 15,
-
   },
   //STYLES FOR THE AREA WHERE I PUT IN THE TITLE OF THE AUDIO
-  titleNew:{
-    backgroundColor:"red",
+  titleNew: {
+    // backgroundColor:"red",
     borderColor: "#654321",
     borderWidth: 4,
     borderRadius: 10,
@@ -397,18 +348,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#654321", //Dark Brown color for the line around the recording names
   },
-  btn:{
+  btn: {
     backgroundColor: "#654321",
-    marginHorizontal: 10,
-    width : 50,
-    borderRadius: 8,
+    marginHorizontal: 12,
+    width: 52,
+    borderRadius: 10,
   },
-  btntext:{
+  btntext: {
     color: "white",
     textAlign: "center",
-    margin: 5 ,  //gives the space ,
-    
-
+    margin: 5, //gives the space ,
   },
   input: {
     flex: 1,

@@ -1,8 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
-import {StyleSheet, TextInput, TouchableOpacity,Text,View,Pressable,Image} from "react-native";
-import { auth ,googleProvider } from "../Firebase";
-import { createUserWithEmailAndPassword   } from "firebase/auth";
+import {
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  View,
+  Pressable,
+  Image,
+} from "react-native";
+import { auth, googleProvider } from "../Firebase";
+import { createUserWithEmailAndPassword , signInWithPopup} from "firebase/auth";
+import googleButton from "../assets/googleButton.png";
 
 export default function SignIn() {
   const navigation = useNavigation();
@@ -14,61 +23,52 @@ export default function SignIn() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
 
-//Functions for buttons 
+  //Functions for buttons
   // const handleSubmit = () => {
   //   console.log("SignUp BTN clicked");
   // };
 
-  const handleSignUp = () =>{
-    navigation.navigate("SignUp") //navigate to signIn page
-    console.log("Proceed btn pressed ,to Audi Journal")
+  const handleSignUp = () => {
+    navigation.navigate("SignUp"); //navigate to signIn page
+    console.log("Proceed btn pressed ,to Audi Journal");
   };
 
-  const handleForgotPassword = () =>{
-    console.log('password forgot')
-  }
-
-
+  const handleForgotPassword = () => {
+    console.log("password forgot");
+  };
 
   const signinPg = async () => {
-    try{
-    await createUserWithEmailAndPassword(auth, email, password);
-    navigation.navigate("AudioJournal") //navigate to signIn page
-    console.log("Proceed btn pressed ,to Audi Journal")
-    }catch(error){
-      console.error("Error" , error)
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      navigation.navigate("AudioJournal"); //navigate to signIn page
+      console.log("Proceed btn pressed ,to Audi Journal");
+    } catch (error) {
+      console.error("Error", error);
     }
-  }; // signing end bracket 
+  }; // signing end bracket
 
-  const signinwithgoogle = async() => {
-    try{
-      await  signInWithPopup(auth, googleProvider);
-      navigation.navigate("AudioJournal") //navigate to signIn page
-      console.log("Proceed btn pressed ,to Audi Journal")
-      }catch(error){
-        console.error("Error signing in with Google" , error)
-      }
-
-  };//google end bracket
-
-  
+  const signinwithgoogle = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      navigation.navigate("AudioJournal"); //navigate to signIn page
+      console.log("Proceed btn pressed ,to Audi Journal");
+    } catch (error) {
+      console.error("Error signing in with Google", error);
+    }
+  }; //google end bracket
 
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
-    
-      <Image
-            style={styles.image}
-            source={require("../assets/blackcasset.jpg")}
-          />
- 
+        <Image
+          style={styles.image}
+          source={require("../assets/blackcasset.jpg")}
+        />
       </View>
       <View style={styles.bottomContainer}>
         <View style={styles.innerContainer}>
           <View style={styles.inputContainer}>
-    
             <TextInput
               style={styles.textInput}
               placeholder="Email"
@@ -82,32 +82,30 @@ export default function SignIn() {
             />
           </View>
           <View style={styles.actionContainer}>
-           
-            <Pressable
-              style={styles.actionButton}
-              onPress={() => signinPg()}>
-              <Text style={styles.signIn}>JOIN US</Text>
+            <Pressable style={styles.actionButton} onPress={() => signinPg()}>
+              <Text style={styles.signIn}>SIGN IN </Text>
             </Pressable>
-              
-            <Pressable
-              style={styles.actionButton}
-              onPress={() => signinwithgoogle()}>
-              <Text style={styles.signIn}>Sign In with Google</Text>
-            </Pressable>
-        
+
+          
+            <TouchableOpacity
+              onPress={()=>signinwithgoogle()}
+            >
+              <Image source={googleButton} style={styles.actionButton} />
+            </TouchableOpacity>
+            
           </View>
           <View style={styles.navlogs}>
-              <View style={styles.signUpOpt}>
-                <Text style={styles.noAccText}>Already Signed Up?</Text>
-                <TouchableOpacity onPress={handleSignUp}>
-                  <Text style={styles.signUpText}>Sign Up</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.forgotPassWordCont}>
-                <TouchableOpacity onPress={handleForgotPassword}>
-                  <Text style={styles.forgotPassWordText}>Forgot Password</Text>
-                </TouchableOpacity>
-              </View>
+            <View style={styles.signUpOpt}>
+              <Text style={styles.noAccText}>Haven't Signed Up? {" "} {" "}</Text>
+              <TouchableOpacity onPress={handleSignUp}>
+                <Text style={styles.signUpText}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.forgotPassWordCont}>
+              <TouchableOpacity onPress={handleForgotPassword}>
+                <Text style={styles.forgotPassWordText}>Forgot Password</Text>
+              </TouchableOpacity>
             </View>
         </View>
       </View>
@@ -134,13 +132,12 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: "bold",
     fontFamily: "C",
-    alignItems: "center"
+    alignItems: "center",
   },
   image: {
     width: 350,
     height: 280,
     borderRadius: 100,
-    
   },
 
   bottomContainer: {
@@ -176,11 +173,11 @@ const styles = StyleSheet.create({
 
   actionButton: {
     backgroundColor: "#654321", //Dark Brown color
-    borderRadius: 15,
+    borderRadius: 17,
     justifyContent: "center",
     alignItems: "center",
-    width: 280, //width of the save button ,
-    height: 46,
+    width: 295, //width of the save button ,
+    height: 47,
     marginVertical: 13,
   },
 
@@ -189,9 +186,29 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: "bold",
   },
-  navlogs:{
+  navlogs: {
+    flexDirection:  "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: 8,
+  },
+
+  signUpOpt:{
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  forgotPassWordCont:{
+    flexDirection: "row",
+    alignItems: "center",
+    // alignContent: "center",
+    // flex: 2,
+  },
+  forgotPassWordText:{
+    color: "blue",
+    textDecorationLine: "underline",
     justifyContent: "center",
     alignItems: "center",
-
+    textAlign: "center"
+    // textAlignVertical: 5 ,
   }
 });

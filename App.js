@@ -20,10 +20,10 @@ export default function App() {
   return (
     <NavigationContainer initialRouteName="Home">
       <Stack.Navigator>
-        <Stack.Screen name="Home" component={LandPage} />
+        {/* <Stack.Screen name="Home" component={LandPage} /> */}
         
-        <Stack.Screen name="SignIn" component={SignIn} />
-        <Stack.Screen name="SignUp" component={SignUp} />
+        {/* <Stack.Screen name="SignIn" component={SignIn} /> */}
+        {/* <Stack.Screen name="SignUp" component={SignUp} /> */}
         <Stack.Screen name="AudioJournal"component={AudioJournal} />
         <Stack.Screen name="SignOut" component={SignOut} />
 
