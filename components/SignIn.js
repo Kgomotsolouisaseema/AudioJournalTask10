@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -8,9 +8,14 @@ import {
   View,
   Pressable,
   Image,
+  Alert,
 } from "react-native";
 import { auth, googleProvider } from "../Firebase";
-import { createUserWithEmailAndPassword , signInWithPopup} from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  onAuthStateChanged,
+} from "firebase/auth";
 import googleButton from "../assets/googleButton.png";
 
 export default function SignIn() {
@@ -24,10 +29,18 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  //Functions for buttons
-  // const handleSubmit = () => {
-  //   console.log("SignUp BTN clicked");
-  // };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        //user is not signed in , navigate to audiojournal
+        navigation.navigate("AudioJournal");
+      } else {
+        Alert.alert("user sigend in");
+      }
+    });
+    //clean up subscription when component mounts
+    return () => unsubscribe();
+  }, []); //Empty dependency
 
   const handleSignUp = () => {
     navigation.navigate("SignUp"); //navigate to signIn page
@@ -38,14 +51,16 @@ export default function SignIn() {
     console.log("password forgot");
   };
 
-  const signinPg = async () => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigation.navigate("AudioJournal"); //navigate to signIn page
-      console.log("Proceed btn pressed ,to Audi Journal");
-    } catch (error) {
-      console.error("Error", error);
-    }
+  const signinPg = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        console.log("Proceed btn pressed to Audio Journal");
+        navigation.navigate("AudioJournal"); //navigate to signIn page
+      })
+      .catch((error) => {
+        Alert.alert("Error siging In ");
+        console.log("Error siging In ", error);
+      });
   }; // signing end bracket
 
   const signinwithgoogle = async () => {
@@ -86,27 +101,23 @@ export default function SignIn() {
               <Text style={styles.signIn}>SIGN IN </Text>
             </Pressable>
 
-          
-            <TouchableOpacity
-              onPress={()=>signinwithgoogle()}
-            >
+            <TouchableOpacity onPress={() => signinwithgoogle()}>
               <Image source={googleButton} style={styles.actionButton} />
             </TouchableOpacity>
-            
           </View>
           <View style={styles.navlogs}>
             <View style={styles.signUpOpt}>
-              <Text style={styles.noAccText}>Haven't Signed Up? {" "} {" "}</Text>
+              <Text style={styles.noAccText}>Haven't Signed Up? </Text>
               <TouchableOpacity onPress={handleSignUp}>
                 <Text style={styles.signUpText}>Sign Up</Text>
               </TouchableOpacity>
             </View>
           </View>
           <View style={styles.forgotPassWordCont}>
-              <TouchableOpacity onPress={handleForgotPassword}>
-                <Text style={styles.forgotPassWordText}>Forgot Password</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={handleForgotPassword}>
+              <Text style={styles.forgotPassWordText}>Forgot Password</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
@@ -187,28 +198,28 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   navlogs: {
-    flexDirection:  "row",
+    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     margin: 8,
   },
 
-  signUpOpt:{
+  signUpOpt: {
     flexDirection: "row",
     alignItems: "center",
   },
-  forgotPassWordCont:{
+  forgotPassWordCont: {
     flexDirection: "row",
     alignItems: "center",
     // alignContent: "center",
     // flex: 2,
   },
-  forgotPassWordText:{
+  forgotPassWordText: {
     color: "blue",
     textDecorationLine: "underline",
     justifyContent: "center",
     alignItems: "center",
-    textAlign: "center"
+    textAlign: "center",
     // textAlignVertical: 5 ,
-  }
+  },
 });

@@ -23,7 +23,6 @@ function LandPage() {
         <Pressable
               style={styles.actionButton}
               title="Head to Sign In"
-
               onPress={navigatetoSignIn}
             >
               <Text style={styles.signIn}>PROCEED</Text>

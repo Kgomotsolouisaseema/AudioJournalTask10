@@ -1,5 +1,5 @@
-// import 'react-native-gesture-handler';        //Rememebr to uncomment when routing to pages later 
-// // import Reanimated from 'react-native-reanimated';
+import 'react-native-gesture-handler';        //Rememebr to uncomment when routing to pages later 
+import Reanimated from 'react-native-reanimated';
 
 import { StyleSheet } from 'react-native';
 
@@ -20,12 +20,12 @@ export default function App() {
   return (
     <NavigationContainer initialRouteName="Home">
       <Stack.Navigator>
-        {/* <Stack.Screen name="Home" component={LandPage} /> */}
-        
-        {/* <Stack.Screen name="SignIn" component={SignIn} /> */}
-        {/* <Stack.Screen name="SignUp" component={SignUp} /> */}
-        <Stack.Screen name="AudioJournal"component={AudioJournal} />
-        <Stack.Screen name="SignOut" component={SignOut} />
+        <Stack.Screen name="Home" component={LandPage} /> 
+        <Stack.Screen name="SignIn" component={SignIn} />
+         <Stack.Screen name="AudioJournal"component={AudioJournal} />
+        <Stack.Screen name="SignUp" component={SignUp} />
+       
+        {/* <Stack.Screen name="SignOut" component={SignOut} /> */}
 
         
       </Stack.Navigator>
