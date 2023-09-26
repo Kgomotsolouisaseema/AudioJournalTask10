@@ -40,13 +40,6 @@ export default function SignUp() {
     console.log('password forgot')
   }
 
-  
-
-  // const navigatetoSignIn =() =>{
-  //   navigation.navigate("SignIn") //navigate to signIn page
-  //   console.log("Proceed btn pressed")
-  // };
-
 
   return (
     <View style={styles.container}>
@@ -125,7 +118,7 @@ const styles = StyleSheet.create({
     // color: "white",
     fontSize: 40,
     fontWeight: "bold",
-    fontFamily: "C",
+    // fontFamily: "C",
     alignItems: "center"
   },
   image: {

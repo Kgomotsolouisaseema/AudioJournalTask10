@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';        //Rememebr to uncomment when routing to pages later 
-import Reanimated from 'react-native-reanimated';
+// import Reanimated from 'react-native-reanimated';
 
 import { StyleSheet } from 'react-native';
 
@@ -9,7 +9,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import LandPage from './components/LandPage';
 import SignUp from './components/SignUp';
-import SignOut from './components/SignOut';
+// import SignOut from './components/SignOut'; // added the function to the audio journal page
 import SignIn from './components/SignIn';
 import AudioJournal from './components/AudioJournal';
 

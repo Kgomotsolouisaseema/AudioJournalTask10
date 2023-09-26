@@ -21,10 +21,7 @@ import googleButton from "../assets/googleButton.png";
 export default function SignIn() {
   const navigation = useNavigation();
 
-  // const navigatetoAudioJournal =() =>{
-  //   navigation.navigate("AudioJournal") //navigate to signIn page
-  //   console.log("Proceed btn pressed ,to Audi Journal")
-  // };
+
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

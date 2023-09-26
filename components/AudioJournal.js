@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,8 +11,8 @@ import {
 import { Audio, getStatusAsync } from "expo-av";
 import theicon from "../assets/theicon.jpg";
 import { TouchableOpacity } from "react-native";
-import { auth, db,signout} from "../Firebase";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { auth, db, signout } from "../Firebase";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   collection,
   addDoc,
@@ -22,7 +22,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-// import { Tile } from "react-native-elements";
+// import { Platform } from "react-native";
 
 const RecordingOptions = {
   isMeteringEnabled: true,
@@ -54,40 +54,30 @@ const RecordingOptions = {
 const AudioRecorder = () => {
   const navigation = useNavigation();
 
-  const [currentUser , setUser]=useState(null);
+  const [currentUser, setUser] = useState(null);
   const [recording, setRecording] = useState(null);
-  const [title, setTitle] = useState("");
+  // const [title, setTitle] = useState("");
   const [audioTitle, setAudioTitle] = useState("");
   const [editTitle, setEditTitle] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedAudioURL, setSelectedAudioURL] = useState(null);
   const [recordings, setRecordings] = useState([
-    { id: 1, title: "Recording 1" }
+    { id: 1, title: "Recording 1" },
   ]);
-  // const [isRecording, setIsRecording] = useState(false);
-  // const [sound, setSound] = useState(null);
-  // const [sound, setSound] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [sound, setSound] = useState(null);
 
-  
-   useEffect(()=>{
+  useEffect(() => {
     const user = auth.currentUser;
-    if(!user){
-
-      onAuthStateChanged(auth,(user)=>{
+    if (!user) {
+      onAuthStateChanged(auth, (user) => {
         setUser(user);
-      })
-      
-    }else{
-      
+      });
+    } else {
       console.log("user logged in ", user);
-      
     }
-    
+  }, []);
 
-   },[])
-
-  
   console.log("Userlogged in");
-
 
   useEffect(() => {
     // Load recordings from Firebase Firestore when the component mounts
@@ -112,7 +102,7 @@ const AudioRecorder = () => {
     loadRecordings();
   }, []);
 
-  //Recording Sounds
+  //trying these start and stop functions
 
   async function startRecording() {
     try {
@@ -136,112 +126,129 @@ const AudioRecorder = () => {
   }
 
   async function stopRecording() {
+    console.log("Stopping recording..");
+
+    if (!recording) {
+      console.warn("Recording is not active.");
+      return;
+    }
+
     try {
-      if (recording) {
-        if (recording.isRecording) {
-          console.log("Recording stopped");
-          await recording.stopAndUnloadAsync();
-  
-          // Upload audio to Firebase Storage
-          const storage = getStorage();
-          const audioFileRef = ref(
-            storage,
-            `audioRecordings/${Date.now()}.m4a`
-          );
-          const recordingURL = recording.getURI();
-          console.log("Recording stopped and stored at", recordingURL);
-          const recordingBlob = await fetch(recordingURL).then((res) =>
-            res.blob()
-          );
-  
-          // Upload the audio recording as a string to Storage
-          await uploadBytes(audioFileRef, recordingBlob, "data_url");
-          console.log("File upload success", recordingBlob);
-  
-          // Save the recording URL and other details to Firestore
-          const docRef = await addDoc(collection(db, "recordings"), {
-            title: audioTitle,
-            audioTitle: audioTitle,
-            audioURL: `gs://${audioFileRef.bucket}/${audioFileRef.fullPath}`,
-          });
-  
-          // Update the recordings list
-          setRecordings((prevRecordings) => [
-            ...prevRecordings,
-            {
-              id: docRef.id,
-              title: audioTitle,
-            },
-          ]);
-          setRecording(null);
-          setAudioTitle("");
-        } else {
-          console.warn("Recording is not active.");
-        }
-      }
+      // Stop the recording
+      await recording.stopAndUnloadAsync();
+
+      // Set audio mode to disallow recording (if needed)
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+      });
+
+      const uri = recording.getURI();
+      console.log("Recording stopped and stored at", uri);
+
+      // Upload audio to Firebase Storage
+      const storage = getStorage();
+      const audioFileRef = ref(storage, `audioRecordings/${Date.now()}.m4a`);
+      const recordingBlob = await fetch(uri).then((res) => res.blob());
+
+      await uploadBytes(audioFileRef, recordingBlob, {
+        contentType: "audio/m4a",
+      }); //.then() this is where you will use the getdownload url and then you will have a function that (adddoc) that takes the items to firstore
+      const downloadURL = await getDownloadURL(audioFileRef);
+      console.log("File upload success", downloadURL);
+      //im creating a new object with title and url of the audio  here
+      const addAudio = await addDoc(collection(db, "recordings"), {
+        title: audioTitle,
+        url: downloadURL,
+      }); //upload the audio title and url to firestore
+      setRecording(""); //reset the audio
+      setAudioTitle(""); //reset the title
+
+      // Now, you can save the URL to Firebase Firestore or perform other actions as needed
     } catch (error) {
-      console.error(error);
-      setErrorMessage("Failed to save. Record audio first!");
+      console.error("Error stopping or uploading recording:", error);
+      // Handle the error as needed
     }
   }
+
+  //Playing Sounds
+  async function playSound(downloadURL) {
+    try {
+      if (!downloadURL) {
+        console.warn("Audio URL is null or undefined.");
+        return; // Don't attempt to play if the URL is missing
+      }
+
+      console.log("Loading Sound");
+      const { sound } = await Audio.Sound.createAsync({
+        uri: downloadURL,
+      });
+      setSound(sound);
+
+      console.log("Playing Sound");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Failed to play sound", error);
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (sound) {
+        console.log("Unloading Sound");
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
 
   const editRecordingTitle = (index) => {
     console.log("edit btn clicked ");
     setEditTitle(index);
     setAudioTitle(recordings[index].title);
 
-    // setTitle(recordings[index].title)
+
   };
 
   //edit title function
-  const updateTitle = async (index,id) => {
+  const updateTitle = async (index, id) => {
     const record = recordings[index];
     console.log("edit btn clicked ", record);
 
     try {
       await updateDoc(doc(db, "recordings", record.id), {
         title: audioTitle,
-        // Update other fields as needed
       });
 
-      const updatedRecordings = recordings.map((recording) => {
-        if (recording.id === id) {
-          return { ...recording, title: audioTitle };
-        }
-        return recording;
-      });
-
-      setRecordings(updatedRecordings);
+      const updatedRecordings = [...recordings]; // Create a copy of recordings
+      updatedRecordings[index].title = audioTitle; // Update the title in the copied array
+      setRecordings(updatedRecordings); // Set the updated array
+      setEditTitle(""); // Clear the edit title state
     } catch (error) {
       console.error("Error editing recording title", error);
     }
   };
 
   const deleteRecording = async (id) => {
-    console.log("delete btn clicked ", id);
     try {
       await deleteDoc(doc(db, "recordings", id));
       const updatedRecordings = recordings.filter(
         (recording) => recording.id !== id
       );
-      console.log("success delete");
       setRecordings(updatedRecordings);
     } catch (error) {
       console.error("Error deleting recording", error);
     }
   };
 
-  const logout = async() => {
-    try{
-      await  auth.signOut().then(()=>{
-        console.log("Signed out success")
-        navigation.navigate("Home")
-      })
-      }catch(error){
-        console.error("Error signing in with Google" , error)
-      }
-
-  };//google end bracket
+  const logout = async () => {
+    try {
+      await auth.signOut().then(() => {
+        console.log("Signed out success");
+        navigation.navigate("Home");
+      });
+    } catch (error) {
+      console.error("Error signing in with Google", error);
+    }
+  }; //google end bracket
 
   return (
     <View style={styles.container}>
@@ -257,8 +264,6 @@ const AudioRecorder = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.playSound}></View>
-
       <FlatList
         data={recordings}
         keyExtractor={(item) => item.id.toString()}
@@ -266,18 +271,18 @@ const AudioRecorder = () => {
           try {
             return (
               <View key={index} style={styles.listItem}>
-                <Text>{item.title}</Text>
-                {/* <TextInput
-                  style={styles.input}
-                  value={item.title}
-                  onChangeText={(text) => editRecordingTitle(item.id, text)}
-                /> */}
+                <TouchableOpacity
+                  style={styles.listItem}
+                  onPress={() => setSelectedAudioURL(item.url)}
+                >
+                  <Text>{item.title}</Text>
+                </TouchableOpacity>
 
                 {editTitle === index ? (
                   <TouchableOpacity
                     style={styles.btn}
                     title="Edit"
-                    onPress={() => updateTitle(index,item.id)}
+                    onPress={() => updateTitle(index, item.id)}
                   >
                     <Text style={styles.btntext}>Update</Text>
                   </TouchableOpacity>
@@ -306,13 +311,19 @@ const AudioRecorder = () => {
           }
         }}
       />
-      <TouchableOpacity
-                  style={styles.btn}
-                  title="Logout"
-                  onPress={logout}
-                >
-                  <Text style={styles.btntext}>Log Out</Text>
-                </TouchableOpacity>
+      <View>
+        <TouchableOpacity
+          style={styles.titleNew}
+          title="Play"
+          onPress={() => playSound(selectedAudioURL)}
+        >
+          <Text style={styles.signIn}>Play Sound</Text>
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity style={styles.titleNew} title="Logout" onPress={logout}>
+        <Text style={styles.signIn}>Log Out</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -375,6 +386,19 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 8,
     marginHorizontal: 10,
+  },
+  // actionContainer: {
+  //   height: 60,
+  //   marginTop: 10,
+  //   borderRadius: 10,
+  //   backgroundColor: "red",
+  //   justifyContent: "center", //ALIGNS THE  CONTENT IN THE BUTTON IN THE CENTER ?
+  //   alignItems: "center", //MOVES THE WHOLE BUTTON TO THE CENTER OF THE PAGE
+  // },
+  signIn: {
+    color: "black",
+    fontSize: 19,
+    fontWeight: "bold",
   },
 });
 
